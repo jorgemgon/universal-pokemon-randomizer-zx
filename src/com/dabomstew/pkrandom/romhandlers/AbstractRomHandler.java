@@ -841,9 +841,18 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
                 for (Encounter enc : area.encounters) {
                     // Pick a random themed pokemon
-                    enc.pokemon = possiblePokemon.get(this.random.nextInt(possiblePokemon.size()));
-                    while (enc.pokemon.actuallyCosmetic) {
+                    boolean earlyArea = com.dabomstew.pkrandom.ddoz.SpeciesWeights.isEarlyArea(area);
+                    if (com.dabomstew.pkrandom.ddoz.SpeciesWeights.isEnabled()) {
+                        enc.pokemon = com.dabomstew.pkrandom.ddoz.SpeciesWeights.pick(possiblePokemon, this.random, earlyArea, false);
+                    } else {
                         enc.pokemon = possiblePokemon.get(this.random.nextInt(possiblePokemon.size()));
+                    }
+                    while (enc.pokemon.actuallyCosmetic) {
+                        if (com.dabomstew.pkrandom.ddoz.SpeciesWeights.isEnabled()) {
+                            enc.pokemon = com.dabomstew.pkrandom.ddoz.SpeciesWeights.pick(possiblePokemon, this.random, earlyArea, false);
+                        } else {
+                            enc.pokemon = possiblePokemon.get(this.random.nextInt(possiblePokemon.size()));
+                        }
                     }
                     setFormeForEncounter(enc, enc.pokemon);
                 }
@@ -1435,9 +1444,18 @@ public abstract class AbstractRomHandler implements RomHandler {
                         throw new RandomizationException("Could not find a possible Pokemon of the correct type.");
                     }
                     // Pick a random themed pokemon
-                    enc.pokemon = possiblePokemon.get(this.random.nextInt(possiblePokemon.size()));
-                    while (enc.pokemon.actuallyCosmetic) {
+                    boolean earlyArea = com.dabomstew.pkrandom.ddoz.SpeciesWeights.isEarlyArea(area);
+                    if (com.dabomstew.pkrandom.ddoz.SpeciesWeights.isEnabled()) {
+                        enc.pokemon = com.dabomstew.pkrandom.ddoz.SpeciesWeights.pick(possiblePokemon, this.random, earlyArea, false);
+                    } else {
                         enc.pokemon = possiblePokemon.get(this.random.nextInt(possiblePokemon.size()));
+                    }
+                    while (enc.pokemon.actuallyCosmetic) {
+                        if (com.dabomstew.pkrandom.ddoz.SpeciesWeights.isEnabled()) {
+                            enc.pokemon = com.dabomstew.pkrandom.ddoz.SpeciesWeights.pick(possiblePokemon, this.random, earlyArea, false);
+                        } else {
+                            enc.pokemon = possiblePokemon.get(this.random.nextInt(possiblePokemon.size()));
+                        }
                     }
                     setFormeForEncounter(enc, enc.pokemon);
                 } else if (usePowerLevels) {
@@ -4014,9 +4032,16 @@ public abstract class AbstractRomHandler implements RomHandler {
             banned.addAll(getIrregularFormes());
         }
         for (int i = 0; i < starterCount; i++) {
-            Pokemon pkmn = allowAltFormes ? randomPokemonInclFormes() : randomPokemon();
-            while (pickedStarters.contains(pkmn) || banned.contains(pkmn) || pkmn.actuallyCosmetic) {
+            Pokemon pkmn;
+            if (com.dabomstew.pkrandom.ddoz.SpeciesWeights.isEnabled()) {
+                List<Pokemon> candidates = new ArrayList<>(allowAltFormes ? mainPokemonListInclFormes : mainPokemonList);
+                candidates.removeIf(pk -> banned.contains(pk) || pk.actuallyCosmetic || pickedStarters.contains(pk));
+                pkmn = com.dabomstew.pkrandom.ddoz.SpeciesWeights.pick(candidates, this.random, false, true);
+            } else {
                 pkmn = allowAltFormes ? randomPokemonInclFormes() : randomPokemon();
+                while (pickedStarters.contains(pkmn) || banned.contains(pkmn) || pkmn.actuallyCosmetic) {
+                    pkmn = allowAltFormes ? randomPokemonInclFormes() : randomPokemon();
+                }
             }
             pickedStarters.add(pkmn);
         }
@@ -7258,7 +7283,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     /* Helper methods used by subclasses and/or this class */
 
-    void checkPokemonRestrictions() {
+    public void checkPokemonRestrictions() {
         if (!restrictionsSet) {
             setPokemonPool(null);
         }
