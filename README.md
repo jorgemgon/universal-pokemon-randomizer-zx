@@ -1,35 +1,56 @@
-Universal Pokemon Randomizer ZX by Ajarmar
+# Daily Dose of Ironmon — randomizer fork (UPR-ZX 4.6.1)
 
-With significant contributions from darkeye, cleartonic
+Public GPL-3 fork of [Universal Pokemon Randomizer ZX](https://github.com/Ajarmar/universal-pokemon-randomizer-zx)
+used by the Daily Dose extension and pipeline. No ROMs or ROM-derived data are stored here.
 
-Based on the Universal Pokemon Randomizer by Dabomstew
+## Build
 
-# Info
+Requirements: JDK 8+ (the produced jar targets Java 8). On this workstation:
 
-This fork was originally made to make some minor tweaks and fixes, but became a bit more ambitious since 2020. There are several new features and supported games (including 3DS games) compared to the original Universal Pokemon Randomizer.
+```powershell
+.\build.ps1
+```
 
-Have a look at the [release page](https://github.com/Ajarmar/universal-pokemon-randomizer-zx/releases) for changelogs and downloads.
+The script compiles `src/**/*.java`, copies the non-Java resources (config tables, the
+`kaizo-v1.rnqs` preset), and writes `build/ddoz-zx.jar`.
 
-# Contributing
+## CLI
 
-If you want to contribute something to the codebase, we'd recommend creating an issue for it first (using the`Contribution Idea` template). This way, we can discuss whether or not it's a good fit for the randomizer before you put in the work to implement it. This is just to save you time in the event that we don't think it's something we want to accept.
+```
+java -jar build/ddoz-zx.jar cli --print-preset kaizo-v1
+java -jar build/ddoz-zx.jar cli -i <vanilla.gba> -o <out.gba> -S <settings> -z <seed> \
+     --base-ips <faster-firered.ips> --guaranteed-catch --weights-preset daily-v1 \
+     -l --print-sha1 --fingerprints
+```
 
-See [the Wiki Page](https://github.com/Ajarmar/universal-pokemon-randomizer-zx/wiki/Building-Universal-Pokemon-Randomizer-ZX) for setting up to build/test locally.
+Flags:
 
-### What is a good fit for the randomizer?
+- `-s <file>` / `-S <string>` — `.rnqs` file or settings string.
+- `-z <seed>` — deterministic seed (passed to `Randomizer.randomize`).
+- `--base-ips <file>` — apply an IPS/IPS32 patch to the ROM before randomization.
+- `--guaranteed-catch` — minimum catch rate level 5 (the one intentional Kaizo deviation).
+- `--weights-preset daily-v1` — lab/early-route species weighting; `none` disables.
+- `--weight-power`, `--weight-cap`, `--type-bias TYPE=factor`, `--type-bias-scope lab|early|all`.
+- `--fingerprints` — print `fingerprint:<stage> <sha>` for starters/wild/trainers/movesets/rom.
+- `--double-check` — generate twice and compare the SHA-1.
+- `--probe --species <id>` or `--type <type>` `--max <n>` `[--from <seed>]` — seed search for starters.
+- `--print-preset kaizo-v1` — print the bundled official preset settings string.
 
-In general, we try to make settings as universal as possible. This means that it preferably should work in as many games as possible, and also that it's something that many people will find useful. If the setting is very niche, it will mostly just bloat the GUI.
+## Preset
 
-If your idea is a change to an existing setting rather than a new setting, it needs to be well motivated.
+`kaizo-v1` is the official `FRLG Kaizo.rnqs` settings file, bundled as
+`src/com/dabomstew/pkrandom/ddoz/kaizo-v1.rnqs`. It matches the tracker's
+`ironmon_tracker/RandomizerSettings/FRLG Kaizo.rnqs`, except that the Daily Dose pipeline forces
+guaranteed catch (`--guaranteed-catch`).
 
-# Feature requests
+## Layout
 
-We do not take feature requests.
+- `src/com/dabomstew/pkrandom/ddoz/DdozCli.java` — CLI glue.
+- `src/com/dabomstew/pkrandom/ddoz/SpeciesWeights.java` — weighting.
+- `src/com/dabomstew/pkrandom/ddoz/IpsPatcher.java` — IPS/IPS32.
+- `src/**` — upstream UPR-ZX 4.6.1 source (GPL-3), with small hooks in
+  `AbstractRomHandler` for weighted starters/wilds and public `checkPokemonRestrictions`.
 
-# Bug reports
+## License
 
-If you encounter something that seems to be a bug, submit an issue using the `Bug Report` issue template.
-
-# Other problems
-
-If you have problems using the randomizer, it could be because of some problem with Java or your operating system. **If you have problems with starting the randomizer specifically, [read this page first before creating an issue.](https://github.com/Ajarmar/universal-pokemon-randomizer-zx/wiki/About-Java)** If that page does not solve your problem, submit an issue using the `Need Help` issue template.
+GPL-3. See `LICENSE.txt` (upstream).
