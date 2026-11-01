@@ -1556,8 +1556,23 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                 writeFRLGStarterText(squirtleFoundTexts, newStarters.get(2), "you’ve decided on the\\n");
             }
         }
+        if (romEntry.romType == Gen3Constants.RomType_FRLG) {
+            patchFrlgStarterLevel();
+        }
         return true;
 
+    }
+
+    /** Daily Dose: the player's lab starter is level 6 instead of the vanilla 5. */
+    private void patchFrlgStarterLevel() {
+        for (int i = 0; i <= rom.length - 4; i++) {
+            if ((rom[i] & 0xFF) == 0x79
+                    && (rom[i + 1] & 0xFF) == 0x02
+                    && (rom[i + 2] & 0xFF) == 0x40
+                    && (rom[i + 3] & 0xFF) == 0x05) {
+                rom[i + 3] = 0x06;
+            }
+        }
     }
 
     @Override

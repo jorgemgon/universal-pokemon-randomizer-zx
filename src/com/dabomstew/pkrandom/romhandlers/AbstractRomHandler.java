@@ -1971,6 +1971,15 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
         }
 
+        // Daily Dose: the lab rival battle starts at level 6 for a fairer first fight.
+        for (Trainer trainer : currentTrainers) {
+            if (trainer.tag != null && trainer.tag.startsWith("RIVAL1")) {
+                for (TrainerPokemon pokemon : trainer.pokemon) {
+                    pokemon.level = 6;
+                }
+            }
+        }
+
         // Save it all up
         this.setTrainers(currentTrainers, false);
     }
