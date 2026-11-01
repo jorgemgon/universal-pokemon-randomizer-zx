@@ -888,6 +888,50 @@ public class Randomizer {
         }
 
         log.println();
+        log.println("--Evolution Methods--");
+        String[] itemNames = romHandler.getItemNames();
+        for (Pokemon pk : allPokes) {
+            if (pk == null || pk.actuallyCosmetic) {
+                continue;
+            }
+            for (Evolution evo : pk.evolutionsFrom) {
+                log.printf("%-15s -> %-15s | %s" + NEWLINE,
+                        pk.fullName(), evo.toFullName(), describeEvolution(evo, itemNames));
+            }
+        }
+        log.println();
+    }
+
+    private String describeEvolution(Evolution evo, String[] itemNames) {
+        String type = evo.type.name();
+        String item = evo.extraInfo >= 0 && itemNames != null && evo.extraInfo < itemNames.length
+                ? itemNames[evo.extraInfo]
+                : "item " + evo.extraInfo;
+        if (type.startsWith("LEVEL_ITEM")) {
+            return "Level " + evo.extraInfo + " (" + item + ")";
+        }
+        if (type.startsWith("LEVEL")) {
+            return "Level " + evo.extraInfo;
+        }
+        if (type.startsWith("STONE")) {
+            return item;
+        }
+        if (type.equals("TRADE_ITEM")) {
+            return "Trade " + item;
+        }
+        if (type.equals("TRADE")) {
+            return "Trade";
+        }
+        if (type.equals("HAPPINESS_DAY")) {
+            return "Friendship (day)";
+        }
+        if (type.equals("HAPPINESS_NIGHT")) {
+            return "Friendship (night)";
+        }
+        if (type.equals("HAPPINESS")) {
+            return "Friendship";
+        }
+        return type.replace('_', ' ');
     }
 
     private void logPokemonTraitChanges(final PrintStream log) {
