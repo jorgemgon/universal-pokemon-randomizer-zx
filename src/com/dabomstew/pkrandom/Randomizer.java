@@ -1239,10 +1239,40 @@ public class Randomizer {
             log.println();
         }
         log.println();
+        log.println("--Trainer Details--");
+        List<Move> allMoves = romHandler.getMoves();
+        for (Trainer t : trainers) {
+            String originalName = originalTrainerNames.get(t.index);
+            for (TrainerPokemon tpk : t.pokemon) {
+                StringBuilder moves = new StringBuilder();
+                for (int move : tpk.moves) {
+                    if (move <= 0) {
+                        continue;
+                    }
+                    if (moves.length() > 0) {
+                        moves.append(',');
+                    }
+                    moves.append(allMoves.get(move).name);
+                }
+                int packedIvs = tpk.IVs;
+                StringBuilder ivs = new StringBuilder();
+                for (int i = 0; i < 6; i++) {
+                    if (i > 0) {
+                        ivs.append(',');
+                    }
+                    ivs.append((packedIvs >> (5 * i)) & 0x1F);
+                }
+                log.printf("#%d|%s|%s|%d|%s|%d,%d,%d,%d,%d,%d|%d|%s|%s" + NEWLINE,
+                        t.index, originalName, tpk.pokemon.fullName(), tpk.level, ivs,
+                        tpk.hpEVs, tpk.atkEVs, tpk.defEVs, tpk.spatkEVs, tpk.spdefEVs, tpk.speedEVs,
+                        tpk.nature, romHandler.abilityName(romHandler.getAbilityForTrainerPokemon(tpk)),
+                        moves);
+            }
+        }
+        log.println();
     }
 
     private int logStaticPokemon(final PrintStream log, int checkValue, List<StaticEncounter> oldStatics) {
-
         List<StaticEncounter> newStatics = romHandler.getStaticPokemon();
 
         log.println("--Static Pokemon--");
